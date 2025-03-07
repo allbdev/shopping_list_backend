@@ -4,22 +4,15 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
 	"shopping_list/db"
-	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
-type requestData struct {
-	Title      string  `json:"title"`
-	AmountType string  `json:"amount_type"`
-	Price      float32 `json:"price"`
-}
-
-type defaultResponse struct {
-	Status string
-	Data   string
-}
-
-func CreateProdcut(w http.ResponseWriter, r *http.Request) {
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
 	// Read request body
 	body, err := io.ReadAll(r.Body)
@@ -36,19 +29,16 @@ func CreateProdcut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `INSERT INTO products (title, amount_type, price) VALUES (?, ?, ?)`
-	result, err := db.DB.Exec(query, data.Title, data.AmountType, data.Price)
-	if err != nil {
-		http.Error(w, "Failed to insert data", http.StatusBadRequest)
+	query := `UPDATE products SET title = ?, amount_type = ?, price = ? WHERE id = ?`
+	_, queryErr := db.DB.Exec(query, data.Title, data.AmountType, data.Price, id)
+	if queryErr != nil {
+		http.Error(w, "Failed to update the product", http.StatusBadRequest)
 		return
 	}
 
-	lastInsertID, _ := result.LastInsertId()
-	rowsAffected, _ := result.RowsAffected()
-
 	// Create a response struct with data
 	response := defaultResponse{
-		Data:   "Inserted product with ID: " + strconv.Itoa(int(lastInsertID)) + ", Rows Affected: " + strconv.Itoa(int(rowsAffected)),
+		Data:   "Product successfully updated",
 		Status: "Success",
 	}
 

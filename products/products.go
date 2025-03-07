@@ -28,6 +28,8 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		DeleteProduct(w, r)
+	case http.MethodPatch:
+		UpdateProduct(w, r)
 	default:
 		http.Error(w, "Method not allowed 2", http.StatusMethodNotAllowed)
 	}
