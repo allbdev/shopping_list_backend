@@ -24,7 +24,7 @@ func main() {
 	db.DbConnect()
 	http.HandleFunc("/", getRoot)
 	http.HandleFunc("/hello", getHello)
-	http.HandleFunc("/products", products.ListProducts)
+	http.HandleFunc("/products", products.ProductsHandler)
 
 	err := http.ListenAndServe(":3333", nil)
 	if errors.Is(err, http.ErrServerClosed) {
