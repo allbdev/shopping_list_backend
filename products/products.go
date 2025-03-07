@@ -1,12 +1,16 @@
 package products
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 type Product struct {
-	ID        int     `json:"id"`
-	Title     string  `json:"title"`
-	AmoutType string  `json:"amount_type"`
-	Price     float32 `json:"price"`
+	ID        int        `json:"id"`
+	Title     string     `json:"title"`
+	AmoutType string     `json:"amount_type"`
+	Price     float32    `json:"price"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func ProductsHandler(w http.ResponseWriter, r *http.Request) {
