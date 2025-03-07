@@ -15,7 +15,7 @@ type requestData struct {
 	Price     float32 `json:"price"`
 }
 
-type postResponse struct {
+type defaultResponse struct {
 	Status string
 	Data   string
 }
@@ -49,7 +49,7 @@ func CreateProdcut(w http.ResponseWriter, r *http.Request) {
 	rowsAffected, _ := result.RowsAffected()
 
 	// Create a response struct with data
-	response := postResponse{
+	response := defaultResponse{
 		Data:   "Inserted product with ID: " + strconv.Itoa(int(lastInsertID)) + ", Rows Affected: " + strconv.Itoa(int(rowsAffected)),
 		Status: "Success",
 	}

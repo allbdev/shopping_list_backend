@@ -8,6 +8,8 @@ import (
 	"os"
 	"shopping_list/db"
 	"shopping_list/products"
+
+	"github.com/gorilla/mux"
 )
 
 func getRoot(w http.ResponseWriter, r *http.Request) {
@@ -21,12 +23,14 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	r := mux.NewRouter()
 	db.DbConnect()
-	http.HandleFunc("/", getRoot)
-	http.HandleFunc("/hello", getHello)
-	http.HandleFunc("/products", products.ProductsHandler)
+	r.HandleFunc("/", getRoot)
+	r.HandleFunc("/hello", getHello)
+	r.HandleFunc("/products", products.ProductsHandler)
+	r.HandleFunc("/products/{id}", products.ProductHandler)
 
-	err := http.ListenAndServe(":3333", nil)
+	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {

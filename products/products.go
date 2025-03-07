@@ -19,11 +19,16 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 		ListProducts(w, r)
 	case http.MethodPost:
 		CreateProdcut(w, r)
-	case http.MethodPut:
-		// Update an existing record.
-	case http.MethodDelete:
-		// Remove the record.
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed 1", http.StatusMethodNotAllowed)
+	}
+}
+
+func ProductHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodDelete:
+		DeleteProduct(w, r)
+	default:
+		http.Error(w, "Method not allowed 2", http.StatusMethodNotAllowed)
 	}
 }

@@ -24,6 +24,7 @@ func DbConnect() {
 		Addr:                 os.Getenv("DB_ADDR"),
 		DBName:               os.Getenv("DB_NAME"),
 		AllowNativePasswords: os.Getenv("DB_ALLOWNATIVEPASSWORD") == "true",
+		ParseTime:            true,
 	}
 
 	// Get a database handle.
