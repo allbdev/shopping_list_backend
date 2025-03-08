@@ -23,8 +23,9 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := mux.NewRouter()
 	db.DbConnect()
+
+	r := mux.NewRouter()
 	r.HandleFunc("/", getRoot)
 	r.HandleFunc("/hello", getHello)
 	r.HandleFunc("/products", products.ProductsHandler)
