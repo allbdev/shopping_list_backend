@@ -6,8 +6,3 @@ CREATE TABLE products (
   price           DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`)
 );
-
-INSERT INTO products
-  (title, amount_type, price)
-VALUES
-  ('Pão de Hamburguer', 'unidade', 13.99)
