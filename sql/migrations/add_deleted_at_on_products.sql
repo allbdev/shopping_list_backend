@@ -1,2 +1,0 @@
-ALTER TABLE products
-ADD COLUMN deleted_at DATETIME NULL AFTER price;
