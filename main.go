@@ -33,6 +33,7 @@ func main() {
 	// Users routes
 	r.HandleFunc("/users/register", auth.Register).Methods(http.MethodPost)
 	r.HandleFunc("/users/login", auth.Login).Methods(http.MethodPost)
+	r.HandleFunc("/users/logout", auth.Logout).Methods(http.MethodPost)
 
 	// Workspaces routes
 	r.HandleFunc("/workspaces", middleware.TokenAuthMiddleware(workspaces.CreateWorkspace)).Methods(http.MethodPost)
@@ -40,6 +41,7 @@ func main() {
 	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.UpdateWorkspace)).Methods(http.MethodPatch)
 	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.DeleteWorkspace)).Methods(http.MethodDelete)
 	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.GetWorkspace)).Methods(http.MethodGet)
+	r.HandleFunc("/workspaces/{workspace_id}/add_user", middleware.TokenAuthMiddleware(workspaces.AddUserToWorkspace)).Methods(http.MethodPost)
 
 	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {
