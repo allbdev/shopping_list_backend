@@ -75,7 +75,7 @@ func ListWorkspaces(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.DB.Query("SELECT id, name, created_at, updated_at, deleted_at FROM workspaces WHERE user_id = ? AND deleted_at IS NULL", userID)
+	rows, err := db.DB.Query("SELECT id, name, created_at, updated_at, deleted_at, user_id FROM workspaces WHERE user_id = ? AND deleted_at IS NULL", userID)
 	if err != nil {
 		http.Error(w, "Error fetching workspaces", http.StatusInternalServerError)
 		return
@@ -85,7 +85,7 @@ func ListWorkspaces(w http.ResponseWriter, r *http.Request) {
 	var workspaces []Workspace
 	for rows.Next() {
 		var workspace Workspace
-		if err := rows.Scan(&workspace.ID, &workspace.Name, &workspace.CreatedAt, &workspace.UpdatedAt, &workspace.DeletedAt); err != nil {
+		if err := rows.Scan(&workspace.ID, &workspace.Name, &workspace.CreatedAt, &workspace.UpdatedAt, &workspace.DeletedAt, &workspace.UserID); err != nil {
 			http.Error(w, "Error scanning workspace", http.StatusInternalServerError)
 			return
 		}
@@ -114,7 +114,7 @@ func GetWorkspace(w http.ResponseWriter, r *http.Request) {
 	workspaceID := vars["workspace_id"]
 
 	var workspace Workspace
-	err = db.DB.QueryRow("SELECT id, name, created_at, updated_at, deleted_at FROM workspaces WHERE id = ? AND user_id = ? AND deleted_at IS NULL", workspaceID, userID).Scan(&workspace.ID, &workspace.Name, &workspace.CreatedAt, &workspace.UpdatedAt, &workspace.DeletedAt)
+	err = db.DB.QueryRow("SELECT id, name, created_at, updated_at, deleted_at, user_id FROM workspaces WHERE id = ? AND user_id = ? AND deleted_at IS NULL", workspaceID, userID).Scan(&workspace.ID, &workspace.Name, &workspace.CreatedAt, &workspace.UpdatedAt, &workspace.DeletedAt, &workspace.UserID)
 	if err != nil {
 		http.Error(w, "Workspace not found", http.StatusNotFound)
 		return
