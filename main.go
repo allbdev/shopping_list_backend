@@ -31,8 +31,8 @@ func main() {
 	r.HandleFunc("/products/{id}", middleware.TokenAuthMiddleware(products.ProductHandler))
 
 	// Users routes
-	r.HandleFunc("/users/register", auth.RegisterHandler)
-	r.HandleFunc("/users/login", auth.LoginHandler)
+	r.HandleFunc("/users/register", auth.Register).Methods(http.MethodPost)
+	r.HandleFunc("/users/login", auth.Login).Methods(http.MethodPost)
 
 	// Workspaces routes
 	r.HandleFunc("/workspaces", middleware.TokenAuthMiddleware(workspaces.CreateWorkspace)).Methods(http.MethodPost)
