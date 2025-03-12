@@ -10,6 +10,7 @@ import (
 	"shopping_list/db"
 	"shopping_list/middleware"
 	"shopping_list/products"
+	"shopping_list/workspaces"
 
 	"github.com/gorilla/mux"
 )
@@ -25,13 +26,20 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", getRoot)
 
-	// Products	routes
+	// Products routes
 	r.HandleFunc("/products", middleware.TokenAuthMiddleware(products.ProductsHandler))
 	r.HandleFunc("/products/{id}", middleware.TokenAuthMiddleware(products.ProductHandler))
 
-	// Auth routes
+	// Users routes
 	r.HandleFunc("/users/register", auth.RegisterHandler)
 	r.HandleFunc("/users/login", auth.LoginHandler)
+
+	// Workspaces routes
+	r.HandleFunc("/workspaces", middleware.TokenAuthMiddleware(workspaces.CreateWorkspace)).Methods(http.MethodPost)
+	r.HandleFunc("/workspaces", middleware.TokenAuthMiddleware(workspaces.ListWorkspaces)).Methods(http.MethodGet)
+	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.UpdateWorkspace)).Methods(http.MethodPatch)
+	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.DeleteWorkspace)).Methods(http.MethodDelete)
+	r.HandleFunc("/workspaces/{workspace_id}", middleware.TokenAuthMiddleware(workspaces.GetWorkspace)).Methods(http.MethodGet)
 
 	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {
