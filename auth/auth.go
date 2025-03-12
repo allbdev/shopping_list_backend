@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"shopping_list/db"
+	"shopping_list/middleware"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -88,4 +89,23 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode("User registered successfully")
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	// Get user ID from the token
+	loggedInUserID, err := middleware.ExtractUserIDFromToken(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Update the token to NULL
+	_, err = db.DB.Exec("UPDATE users SET token = NULL WHERE id = ?", loggedInUserID)
+	if err != nil {
+		http.Error(w, "Error logging out", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Logged out successfully")
 }
