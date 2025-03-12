@@ -148,7 +148,7 @@ func UpdateWorkspace(w http.ResponseWriter, r *http.Request) {
 	workspaceID := vars["workspace_id"]
 
 	// Update the workspace in the database
-	_, err = db.DB.Exec("UPDATE workspaces SET name = ?, updated_at = ? WHERE id = ? AND user_id = ?", workspace.Name, time.Now(), workspaceID, userID)
+	_, err = db.DB.Exec("UPDATE workspaces SET name = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NULL", workspace.Name, time.Now(), workspaceID, userID)
 	if err != nil {
 		http.Error(w, "Error updating workspace", http.StatusInternalServerError)
 		return
