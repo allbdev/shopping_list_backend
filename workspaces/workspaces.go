@@ -3,6 +3,7 @@ package workspaces
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"shopping_list/db"
@@ -204,40 +205,36 @@ func AddUserToWorkspace(w http.ResponseWriter, r *http.Request) {
 	// Get workspace ID from URL parameters
 	vars := mux.Vars(r)
 	workspaceID := vars["workspace_id"]
-
-	// Decode the request body to get the new user ID
-	var requestBody struct {
-		UserID int `json:"user_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+	userID, err := strconv.Atoi(vars["user_id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	// Check if the user exists
 	var userExists int
-	err = db.DB.QueryRow("SELECT id FROM users WHERE id = ? AND deleted_at IS NULL", requestBody.UserID).Scan(&userExists)
+	err = db.DB.QueryRow("SELECT id FROM users WHERE id = ? AND deleted_at IS NULL", userID).Scan(&userExists)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
 
 	// Check if the user ID is the same as the logged-in user ID
-	if requestBody.UserID == loggedInUserID {
+	if userID == loggedInUserID {
 		http.Error(w, "Cannot add yourself to the workspace", http.StatusForbidden)
 		return
 	}
 
 	// Check if the user is already part of the workspace
 	var existingUserID int
-	err = db.DB.QueryRow("SELECT user_id FROM workspace_users WHERE user_id = ? AND workspace_id = ? AND deleted_at IS NULL", requestBody.UserID, workspaceID).Scan(&existingUserID)
+	err = db.DB.QueryRow("SELECT user_id FROM workspace_users WHERE user_id = ? AND workspace_id = ? AND deleted_at IS NULL", userID, workspaceID).Scan(&existingUserID)
 	if err == nil {
 		http.Error(w, "User is already part of this workspace", http.StatusConflict)
 		return
 	}
 
 	// Add the user to the workspace
-	_, err = db.DB.Exec("INSERT INTO workspace_users (user_id, workspace_id) VALUES (?, ?)", requestBody.UserID, workspaceID)
+	_, err = db.DB.Exec("INSERT INTO workspace_users (user_id, workspace_id) VALUES (?, ?)", userID, workspaceID)
 	if err != nil {
 		http.Error(w, "Error adding user to workspace", http.StatusInternalServerError)
 		return
@@ -245,6 +242,40 @@ func AddUserToWorkspace(w http.ResponseWriter, r *http.Request) {
 
 	response := defaultResponse{
 		Data:   "User successfully added to workspace",
+		Status: "Success",
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func RemoveUserFromWorkspace(w http.ResponseWriter, r *http.Request) {
+	// Get workspace ID from URL parameters
+	vars := mux.Vars(r)
+	workspaceID := vars["workspace_id"]
+	userID, err := strconv.Atoi(vars["user_id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is part of the workspace
+	var existingUserID int
+	selectErr := db.DB.QueryRow("SELECT user_id FROM workspace_users WHERE user_id = ? AND workspace_id = ? AND deleted_at IS NULL", userID, workspaceID).Scan(&existingUserID)
+	if selectErr != nil {
+		http.Error(w, "User is not part of this workspace", http.StatusNotFound)
+		return
+	}
+
+	// Soft delete the user from the workspace by setting deleted_at
+	_, updateErr := db.DB.Exec("UPDATE workspace_users SET deleted_at = ? WHERE user_id = ? AND workspace_id = ?", time.Now(), userID, workspaceID)
+	if updateErr != nil {
+		http.Error(w, "Error removing user from workspace", http.StatusInternalServerError)
+		return
+	}
+
+	response := defaultResponse{
+		Data:   "User successfully removed from workspace",
 		Status: "Success",
 	}
 
