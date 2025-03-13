@@ -5,13 +5,21 @@ import (
 	"io"
 	"net/http"
 	"shopping_list/db"
-	"strconv"
 )
 
 type requestData struct {
-	Title      string  `json:"title"`
-	AmountType string  `json:"amount_type"`
-	Price      float32 `json:"price"`
+	Title       string  `json:"title"`
+	AmountType  string  `json:"amount_type"`
+	Price       float32 `json:"price"`
+	WorkspaceID int     `json:"workspace_id"`
+}
+
+type ProductStruct struct {
+	Id          int     `json:"id"`
+	Title       string  `json:"title"`
+	AmountType  string  `json:"amount_type"`
+	Price       float32 `json:"price"`
+	WorkspaceID int     `json:"workspace_id"`
 }
 
 type defaultResponse struct {
@@ -19,7 +27,12 @@ type defaultResponse struct {
 	Data   string
 }
 
-func CreateProdcut(w http.ResponseWriter, r *http.Request) {
+type productResponse struct {
+	Status string
+	Data   ProductStruct
+}
+
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// Read request body
 	body, err := io.ReadAll(r.Body)
@@ -36,19 +49,24 @@ func CreateProdcut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `INSERT INTO products (title, amount_type, price) VALUES (?, ?, ?)`
-	result, err := db.DB.Exec(query, data.Title, data.AmountType, data.Price)
-	if err != nil {
-		http.Error(w, "Failed to insert data", http.StatusBadRequest)
+	query := `INSERT INTO products (title, amount_type, price, workspace_id) VALUES (?, ?, ?, ?)`
+	result, queryErr := db.DB.Exec(query, data.Title, data.AmountType, data.Price, data.WorkspaceID)
+	if queryErr != nil {
+		http.Error(w, "Failed to create the product", http.StatusBadRequest)
 		return
 	}
 
 	lastInsertID, _ := result.LastInsertId()
-	rowsAffected, _ := result.RowsAffected()
 
 	// Create a response struct with data
-	response := defaultResponse{
-		Data:   "Inserted product with ID: " + strconv.Itoa(int(lastInsertID)) + ", Rows Affected: " + strconv.Itoa(int(rowsAffected)),
+	response := productResponse{
+		Data: ProductStruct{
+			Id:          int(lastInsertID),
+			Title:       data.Title,
+			AmountType:  data.AmountType,
+			Price:       data.Price,
+			WorkspaceID: data.WorkspaceID,
+		},
 		Status: "Success",
 	}
 

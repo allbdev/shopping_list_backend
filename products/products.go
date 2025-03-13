@@ -18,7 +18,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		ListProducts(w, r)
 	case http.MethodPost:
-		CreateProdcut(w, r)
+		CreateProduct(w, r)
 	default:
 		http.Error(w, "Method not allowed 1", http.StatusMethodNotAllowed)
 	}
