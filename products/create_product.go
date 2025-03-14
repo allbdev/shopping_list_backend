@@ -49,6 +49,23 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if workspace_id exists in the request body
+	if data.WorkspaceID == 0 {
+		http.Error(w, "Workspace ID is required", http.StatusBadRequest)
+		return
+	}
+
+	var workspaceExists bool
+	err = db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM workspaces WHERE id = ? AND deleted_at IS NULL)", data.WorkspaceID).Scan(&workspaceExists)
+	if err != nil {
+		http.Error(w, "Failed to verify workspace existence", http.StatusInternalServerError)
+		return
+	}
+	if !workspaceExists {
+		http.Error(w, "Workspace does not exist", http.StatusBadRequest)
+		return
+	}
+
 	query := `INSERT INTO products (title, amount_type, price, workspace_id) VALUES (?, ?, ?, ?)`
 	result, queryErr := db.DB.Exec(query, data.Title, data.AmountType, data.Price, data.WorkspaceID)
 	if queryErr != nil {
