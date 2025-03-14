@@ -6,11 +6,12 @@ import (
 )
 
 type Product struct {
-	ID        int        `json:"id"`
-	Title     string     `json:"title"`
-	AmoutType string     `json:"amount_type"`
-	Price     float32    `json:"price"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	ID          int        `json:"id"`
+	Title       string     `json:"title"`
+	AmoutType   string     `json:"amount_type"`
+	Price       float32    `json:"price"`
+	DeletedAt   *time.Time `json:"deleted_at"`
+	WorkspaceID int        `json:"workspace_id"`
 }
 
 func ProductsHandler(w http.ResponseWriter, r *http.Request) {

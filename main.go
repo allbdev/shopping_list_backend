@@ -26,10 +26,6 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", getRoot)
 
-	// Products routes
-	r.HandleFunc("/products", middleware.TokenAuthMiddleware(products.ProductsHandler))
-	r.HandleFunc("/products/{id}", middleware.TokenAuthMiddleware(products.ProductHandler))
-
 	// Users routes
 	r.HandleFunc("/users/register", auth.Register).Methods(http.MethodPost)
 	r.HandleFunc("/users/login", auth.Login).Methods(http.MethodPost)
@@ -44,6 +40,10 @@ func main() {
 	r.HandleFunc("/workspaces/{workspace_id}/add_user/{user_id}", middleware.TokenAuthMiddleware(workspaces.AddUserToWorkspace)).Methods(http.MethodPost)
 	r.HandleFunc("/workspaces/{workspace_id}/remove_user/{user_id}", middleware.TokenAuthMiddleware(workspaces.RemoveUserFromWorkspace)).Methods(http.MethodDelete)
 	r.HandleFunc("/workspaces/{workspace_id}/users", middleware.TokenAuthMiddleware(workspaces.ListUsersInWorkspace)).Methods(http.MethodGet)
+
+	// Products routes
+	r.HandleFunc("/workspaces/{workspace_id}/products", middleware.TokenAuthMiddleware(middleware.CombinedWorkspaceMiddleware(products.ProductsHandler)))
+	r.HandleFunc("/workspaces/{workspace_id}/products/{id}", middleware.TokenAuthMiddleware(middleware.CombinedWorkspaceMiddleware(products.ProductHandler)))
 
 	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {

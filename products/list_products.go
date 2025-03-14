@@ -27,16 +27,16 @@ func ListProducts(w http.ResponseWriter, r *http.Request) {
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
 		var product Product
-		if err := rows.Scan(&product.ID, &product.Title, &product.AmoutType, &product.Price, &product.DeletedAt); err != nil {
+		if err := rows.Scan(&product.ID, &product.Title, &product.AmoutType, &product.Price, &product.DeletedAt, &product.WorkspaceID); err != nil {
 			fmt.Print(err)
-			http.Error(w, "Failed to create product list", http.StatusInternalServerError)
+			http.Error(w, "Failed to create product list 1", http.StatusInternalServerError)
 			return
 		}
 
 		products = append(products, product)
 	}
 	if err := rows.Err(); err != nil {
-		http.Error(w, "Failed to create product list", http.StatusInternalServerError)
+		http.Error(w, "Failed to create product list 2", http.StatusInternalServerError)
 		return
 	}
 
