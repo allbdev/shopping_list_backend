@@ -8,6 +8,7 @@ import (
 	"os"
 	"shopping_list/auth"
 	"shopping_list/db"
+	"shopping_list/lists"
 	"shopping_list/middleware"
 	"shopping_list/products"
 	"shopping_list/workspaces"
@@ -44,6 +45,9 @@ func main() {
 	// Products routes
 	r.HandleFunc("/workspaces/{workspace_id}/products", middleware.TokenAuthMiddleware(middleware.CombinedWorkspaceMiddleware(products.ProductsHandler)))
 	r.HandleFunc("/workspaces/{workspace_id}/products/{id}", middleware.TokenAuthMiddleware(middleware.CombinedWorkspaceMiddleware(products.ProductHandler)))
+
+	// Product Lists routes
+	r.HandleFunc("/workspaces/{workspace_id}/product-lists", middleware.TokenAuthMiddleware(middleware.WorkspaceMiddleware(lists.CreateProductList))).Methods(http.MethodPost)
 
 	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {
