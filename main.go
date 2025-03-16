@@ -48,6 +48,7 @@ func main() {
 
 	// Product Lists routes
 	r.HandleFunc("/workspaces/{workspace_id}/product-lists", middleware.TokenAuthMiddleware(middleware.WorkspaceMiddleware(lists.CreateProductList))).Methods(http.MethodPost)
+	r.HandleFunc("/workspaces/{workspace_id}/product-lists/{list_id}/status", middleware.TokenAuthMiddleware(middleware.WorkspaceMiddleware(lists.UpdateListStatus))).Methods(http.MethodPatch)
 
 	err := http.ListenAndServe(":3333", r)
 	if errors.Is(err, http.ErrServerClosed) {
