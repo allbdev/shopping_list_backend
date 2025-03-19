@@ -1,7 +1,9 @@
 package lists
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"shopping_list/db"
 	"strconv"
@@ -56,12 +58,34 @@ func ListProductLists(w http.ResponseWriter, r *http.Request) {
 		var productName string
 
 		// Scan list and product details
+		// Use nullable types for product fields to handle NULL values
+		var productID, quantity sql.NullInt64
+		var checked sql.NullBool
+		var productCreatedAt, productUpdatedAt, productDeletedAt sql.NullTime
+		var nullableProductName sql.NullString
+
 		err := rows.Scan(
 			&listID, &list.UserID, &list.Title, &list.CreatedAt, &list.UpdatedAt, &list.DeletedAt,
-			&product.ProductID, &product.Quantity, &product.Checked, &product.CreatedAt, &product.UpdatedAt, &product.DeletedAt,
-			&productName,
+			&productID, &quantity, &checked, &productCreatedAt, &productUpdatedAt, &productDeletedAt,
+			&nullableProductName,
 		)
+
+		// Convert nullable types to regular types if valid
+		if productID.Valid {
+			product.ProductID = int(productID.Int64)
+			product.Quantity = int(quantity.Int64)
+			product.Checked = checked.Bool
+			product.CreatedAt = productCreatedAt.Time
+			product.UpdatedAt = productUpdatedAt.Time
+			if productDeletedAt.Valid {
+				product.DeletedAt = &productDeletedAt.Time
+			}
+			if nullableProductName.Valid {
+				productName = nullableProductName.String
+			}
+		}
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, "Error scanning product list", http.StatusInternalServerError)
 			return
 		}
