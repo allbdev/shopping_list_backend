@@ -71,13 +71,16 @@ func ListProductLists(w http.ResponseWriter, r *http.Request) {
 			// Add product to existing list
 			if product.ProductID != 0 { // Ensure product exists
 				product.Name = productName
+				product.ListID = listID
 				existingList.Products = append(existingList.Products, product)
 			}
 		} else {
+
 			// Create a new list entry
 			list.ID = listID
 			if product.ProductID != 0 { // Ensure product exists
 				product.Name = productName
+				product.ListID = listID
 				list.Products = append(list.Products, product)
 			}
 			listMap[listID] = &list
