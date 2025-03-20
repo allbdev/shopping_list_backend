@@ -40,7 +40,7 @@ func ListProductLists(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN list_products lp ON l.id = lp.list_id AND lp.deleted_at IS NULL
 		LEFT JOIN products p ON lp.product_id = p.id AND p.deleted_at IS NULL
 		WHERE l.workspace_id = ? AND l.deleted_at IS NULL
-		ORDER BY l.id, lp.product_id
+		ORDER BY l.id DESC
 	`, workspaceID)
 	if err != nil {
 		http.Error(w, "Error fetching product lists", http.StatusInternalServerError)
