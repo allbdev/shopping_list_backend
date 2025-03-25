@@ -21,6 +21,19 @@ func getRoot(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "This is my website!\n")
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	db.DbConnect()
 
@@ -53,7 +66,10 @@ func main() {
 	r.HandleFunc("/workspaces/{workspace_id}/product-lists/{list_id}/status", middleware.TokenAuthMiddleware(middleware.WorkspaceMiddleware(lists.UpdateListStatus))).Methods(http.MethodPatch)
 	r.HandleFunc("/workspaces/{workspace_id}/product-lists/{list_id}/products/{product_id}", middleware.TokenAuthMiddleware(middleware.WorkspaceMiddleware(lists.DeleteProductFromList))).Methods(http.MethodDelete)
 
-	err := http.ListenAndServe(":3333", r)
+	// Wrap the router with CORS middleware
+	handler := enableCORS(r)
+
+	err := http.ListenAndServe(":3333", handler)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
